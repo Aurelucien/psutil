@@ -249,6 +249,14 @@ class TestHtmlBuild:
         assert f"{substitutions.years_in_development()} years" in html
         assert "{{" not in html
 
+    def test_no_leaked_rst_markup(self, subtests):
+        pre_pat = re.compile(r"<pre\b.*?</pre>", re.DOTALL)
+        leak_pat = re.compile(r":[a-z]+:`|``")
+        for html in all_html_pages():
+            with subtests.test(page=html.relative_to(HTML_DIR)):
+                body = pre_pat.sub("", html.read_text())
+                assert leak_pat.search(body) is None
+
     def test_changelog_anchors(self):
         # Indirectly test _ext/changelog_anchors.py. Every X.Y.Z
         # version heading in changelog.rst must get an `id="XYZ"`
