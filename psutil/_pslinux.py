@@ -1313,7 +1313,10 @@ def sensors_temperatures():
     for base in basenames:
         try:
             path = base + '_input'
-            current = float(bcat(path)) / 1000.0
+            value = bcat(path)
+            if value is None:  # read() returned EAGAIN
+                continue
+            current = float(value) / 1000.0
             path = os.path.join(os.path.dirname(base), 'name')
             unit_name = cat(path).strip()
         except (OSError, ValueError):
@@ -1352,7 +1355,10 @@ def sensors_temperatures():
         for base in basenames:
             try:
                 path = os.path.join(base, 'temp')
-                current = float(bcat(path)) / 1000.0
+                value = bcat(path)
+                if value is None:  # read() returned EAGAIN
+                    continue
+                current = float(value) / 1000.0
                 path = os.path.join(base, 'type')
                 unit_name = cat(path).strip()
             except (OSError, ValueError) as err:
